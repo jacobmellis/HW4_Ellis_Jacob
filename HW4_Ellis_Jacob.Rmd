@@ -1,0 +1,167 @@
+---
+title: "HW4_Ellis_Jacob"
+author: "Jacob Ellis"
+date: "3/8/2022"
+output: html_document
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+---
+
+I continued to explore the historical distribution of track and field medals earned at each Olympic Games through the year 2016. I began by importing and cleaning the data, which was imported from Kaggle as "under the title "Olympic Track and Field Results". It is downloaded as "results.csv" but I renamed it "olympic_medals" for the sake of clarity. The goal was to display information closer to the "full data" than my previous visualizations, in which much was reduced or eliminated. I wanted to show every winner and allow the reader to explore the years, events, and type of medal more closely without overwhelming them with unnecessary data. Because more information is able to be shown in a table, I opted not to update the countries for historically outdated nations (the USSR, Czechoslovakia, East Germany to name a few).
+
+The first table I made was using datatable in the DT package. The ability to sort by different columns and the search bar were both features that I thought important for the reader to have access to. I kept the athletes names for the first time in this data table; the option to search meant that those pieces of information could be of interest and visually possible to include, unlike on a map or a time series plot. My second data table is a more standard table made by the kbl function from the kableExtra package. I made this table to practice the highlight function and the scroll bar: though less pretty than the first table, those are helpful inclusions to a more basic table.
+
+For relay teams, the "Name" variable will be "null" as the medal is awarded to the entire team from a country. 
+
+```{r, include = FALSE}
+library(htmlwidgets)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(kableExtra)
+library(knitr)
+library(tidyverse)
+#install.packages("DT")
+library(DT)
+```
+
+
+```{r setup}
+medals <- read.csv("olympic_medals.csv")
+
+medals8 <- medals[-c(156, 158, 160, 320, 322, 324, 1664, 1666, 1668, 1793, 1795, 1797),]
+medals8 <- subset(medals8, select = c(1, 2, 4, 5, 6, 7))
+medals8[1,]$Nationality <- "GBR"
+
+Country <- rep(NA, times = length(medals8$Nationality))
+medals8 <- cbind(medals8, Country)
+
+#adding full country name for easier search
+medals8[medals8$Nationality == "EUA",]$Country <- "United Team of Germany"
+medals8[medals8$Nationality == "GDR",]$Country <- "East Germany"
+medals8[medals8$Nationality == "FRG",]$Country <- "West Germany"
+medals8[medals8$Nationality == "URS",]$Country <- "USSR"
+medals8[medals8$Nationality == "GBR",]$Country <- "Great Britain"
+medals8[medals8$Nationality == "KEN",]$Country <- "Kenya"
+medals8[medals8$Nationality == "ETH",]$Country <- "Ethiopia"
+medals8[medals8$Nationality == "MAR",]$Country <- "Morocco"
+medals8[medals8$Nationality == "ITA",]$Country <- "Italy"
+medals8[medals8$Nationality == "FIN",]$Country <- "Finland"
+medals8[medals8$Nationality == "POR",]$Country <- "Portugal"
+medals8[medals8$Nationality == "TUN",]$Country <- "Tunisia"
+medals8[medals8$Nationality == "RUS",]$Country <- "Russia"
+medals8[medals8$Nationality == "GER",]$Country <- "Germany"
+medals8[medals8$Nationality == "AUS",]$Country <- "Australia"
+medals8[medals8$Nationality == "TCH",]$Country <- "Czechoslovakia"
+medals8[medals8$Nationality == "FRA",]$Country <- "France"
+medals8[medals8$Nationality == "SWE",]$Country <- "Sweden"
+medals8[medals8$Nationality == "USA",]$Country <- "USA"
+medals8[medals8$Nationality == "ERI",]$Country <- "Eritrea"
+medals8[medals8$Nationality == "BEL",]$Country <- "Belgium"
+medals8[medals8$Nationality == "HUN",]$Country <- "Hungary"
+medals8[medals8$Nationality == "POL",]$Country <- "Poland"
+medals8[medals8$Nationality == "JAM",]$Country <- "Jamaica"
+medals8[medals8$Nationality == "CAN",]$Country <- "Canada"
+medals8[medals8$Nationality == "TTO",]$Country <- "Trinidad and Tobago"
+medals8[medals8$Nationality == "BAR",]$Country <- "Barbados"
+medals8[medals8$Nationality == "NAM",]$Country <- "Namibia"
+medals8[medals8$Nationality == "NED",]$Country <- "Netherlands"
+medals8[medals8$Nationality == "RSA",]$Country <- "South Africa"
+medals8[medals8$Nationality == "CUB",]$Country <- "Cuba"
+medals8[medals8$Nationality == "BUL",]$Country <- "Bulgaria"
+medals8[medals8$Nationality == "PAN",]$Country <- "Panama"
+medals8[medals8$Nationality == "NZL",]$Country <- "New Zealand"
+medals8[medals8$Nationality == "ESP",]$Country <- "Spain"
+medals8[medals8$Nationality == "CHN",]$Country <- "China"
+medals8[medals8$Nationality == "ALG",]$Country <- "Algeria"
+medals8[medals8$Nationality == "QAT",]$Country <- "Qatar"
+medals8[medals8$Nationality == "LUX",]$Country <- "Luxembourg"
+medals8[medals8$Nationality == "IRL",]$Country <- "Ireland"
+medals8[medals8$Nationality == "SUI",]$Country <- "Switzerland"
+medals8[medals8$Nationality == "GRE",]$Country <- "Greece"
+medals8[medals8$Nationality == "IND",]$Country <- "India"
+medals8[medals8$Nationality == "ECU",]$Country <- "Ecuador"
+medals8[medals8$Nationality == "MEX",]$Country <- "Mexico"
+medals8[medals8$Nationality == "GUA",]$Country <- "Guatemala"
+medals8[medals8$Nationality == "TAN",]$Country <- "Tanzania"
+medals8[medals8$Nationality == "NOR",]$Country <- "Norway"
+medals8[medals8$Nationality == "TUR",]$Country <- "Turkey"
+medals8[medals8$Nationality == "KSA",]$Country <- "Saudi Arabia"
+medals8[medals8$Nationality == "PHI",]$Country <- "Philippines"
+medals8[medals8$Nationality == "DOM",]$Country <- "Dominican Republic"
+medals8[medals8$Nationality == "PUR",]$Country <- "Puerto Rico"
+medals8[medals8$Nationality == "ZAM",]$Country <- "Zambia"
+medals8[medals8$Nationality == "UGA",]$Country <- "Uganda"
+medals8[medals8$Nationality == "SRI",]$Country <- "Sri Lanka"
+medals8[medals8$Nationality == "GRN",]$Country <- "Grenada"
+medals8[medals8$Nationality == "CIV",]$Country <- "Ivory Coast"
+medals8[medals8$Nationality == "DEN",]$Country <- "Denmark"
+medals8[medals8$Nationality == "JPN",]$Country <- "Japan"
+medals8[medals8$Nationality == "BRA",]$Country <- "Brazil"
+medals8[medals8$Nationality == "NGR",]$Country <- "Niger"
+medals8[medals8$Nationality == "BWI",]$Country <- "British West Indies"
+medals8[medals8$Nationality == "BDI",]$Country <- "Burundi"
+medals8[medals8$Nationality == "SVK",]$Country <- "Slovakia"
+medals8[medals8$Nationality == "LAT",]$Country <- "Latvia"
+medals8[medals8$Nationality == "EUN",]$Country <- "Former Soviet Union"
+medals8[medals8$Nationality == "SUD",]$Country <- "Sudan"
+medals8[medals8$Nationality == "BOT",]$Country <- "Botswana"
+medals8[medals8$Nationality == "BLR",]$Country <- "Belarus"
+medals8[medals8$Nationality == "EST",]$Country <- "Estonia"
+medals8[medals8$Nationality == "CZE",]$Country <- "Czech Republic"
+medals8[medals8$Nationality == "TPE",]$Country <- "Taiwan"
+medals8[medals8$Nationality == "KAZ",]$Country <- "Kazakhstan"
+medals8[medals8$Nationality == "LTU",]$Country <- "Lithuania"
+medals8[medals8$Nationality == "IRI",]$Country <- "Iran"
+medals8[medals8$Nationality == "TJK",]$Country <- "Tajikistan"
+medals8[medals8$Nationality == "SLO",]$Country <- "Slovenia"
+medals8[medals8$Nationality == "UKR",]$Country <- "Ukraine"
+medals8[medals8$Nationality == "ROU",]$Country <- "Romania"
+medals8[medals8$Nationality == "HAI",]$Country <- "Haiti"
+medals8[medals8$Nationality == "KOR",]$Country <- "South Korea"
+medals8[medals8$Nationality == "ARG",]$Country <- "Argentina"
+medals8[medals8$Nationality == "CHI",]$Country <- "Chile"
+medals8[medals8$Nationality == "DJI",]$Country <- "Djibouti"
+medals8[medals8$Nationality == "YUG",]$Country <- "Yugoslavia"
+medals8[medals8$Nationality == "VEN",]$Country <- "Venezuela"
+medals8[medals8$Nationality == "BRN",]$Country <- "Bahrain"
+medals8[medals8$Nationality == "AUT",]$Country <- "Austria"
+medals8[medals8$Nationality == "COL",]$Country <- "Columbia"
+medals8[medals8$Nationality == "MOZ",]$Country <- "Mozambique"
+medals8[medals8$Nationality == "CRO",]$Country <- "Croatia"
+medals8[medals8$Nationality == "SYR",]$Country <- "Syria"
+medals8[medals8$Nationality == "SRB",]$Country <- "Serbia"
+medals8[medals8$Nationality == "ISL",]$Country <- "Iceland"
+medals8[medals8$Nationality == "CMR",]$Country <- "Cameroon"
+medals8[medals8$Nationality == "BAH",]$Country <- "Bahamas"
+
+medals8$Medal <- factor(medals8$Medal, levels = c('G', 'S', 'B'))
+medals8  <- medals8 %>%
+  select(Event, Year, Nationality, Country, Medal, Name)
+medals8 <- medals8[order(-medals8$Year),]
+
+datatable(medals8, rownames = FALSE)
+```
+
+
+
+
+```{r}
+medals9 <- subset(medals8, select = c(2, 1, 5, 4))
+medals9 <- medals9[order(medals9$Year, medals9$Event, medals9$Medal),]
+
+kbl1 <- kbl(medals9, row.names = FALSE) %>%
+           kable_paper(lightable_options = "hover", full_width = FALSE) %>%
+           scroll_box(width = "50%", height = "300px")
+kbl1
+```
+
+
+These tables and the plots from previous assignments will be combined into a shiny app for the final project.
+
+
+
+
